@@ -1,0 +1,115 @@
+<!doctype html><html><head><meta charset="utf-8"><title>All Bots · GitHub backup</title>
+<style>
+:root{--bg:#0b0f17;--card:#121a27;--line:#1f2b3d;--tx:#d7e0ee;--mut:#7f8ca3;--g:#2fd38a;--r:#ff5c6c;--y:#ffc24a;--b:#5aa9ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:13px/1.45 Inter,system-ui,Segoe UI,Arial,sans-serif}
+header{display:flex;align-items:center;gap:16px;padding:12px 20px;border-bottom:1px solid var(--line);background:#0e1420;position:sticky;top:0;z-index:2}
+h1{font-size:16px;margin:0;letter-spacing:.5px}.sub{color:var(--mut);font-size:12px}
+nav{display:flex;gap:6px;margin-left:auto}nav button{background:transparent;border:1px solid var(--line);color:var(--tx);padding:6px 12px;border-radius:8px;cursor:pointer}
+nav button.on{background:var(--b);border-color:var(--b);color:#041021;font-weight:600}
+main{padding:16px 20px}.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}.card h3{margin:0 0 8px;font-size:13px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+.big{font-size:22px;font-weight:700}.g{color:var(--g)}.r{color:var(--r)}.y{color:var(--y)}.m{color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:5px 6px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}th{color:var(--mut);font-weight:500}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}.pill{padding:1px 7px;border-radius:9px;font-size:11px;border:1px solid var(--line)}
+.sec{display:none}.sec.on{display:block}.full{grid-column:1/-1}pre{white-space:pre-wrap;margin:0;font:11px/1.4 ui-monospace,Menlo,monospace;color:#b8c4d8}
+.chat{max-height:56vh;overflow:auto;display:flex;flex-direction:column;gap:8px}.u,.a{padding:8px 10px;border-radius:10px;max-width:85%;white-space:pre-wrap}
+.u{align-self:flex-end;background:#1d3557}.a{align-self:flex-start;background:#18222f;border:1px solid var(--line)}.ts{font-size:10px;color:var(--mut)}
+.composer{display:flex;gap:8px;margin-top:10px}textarea{flex:1;background:#0e1520;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:8px;min-height:54px;font:inherit}
+select,.send{background:#0e1520;color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px}.send{background:var(--g);color:#04170d;font-weight:700;cursor:pointer;border:0;padding:0 18px}
+#stale{display:none;background:#3a1418;color:#ffb3ba;padding:8px 20px}.term{background:#05080d;border:1px solid var(--line);border-radius:8px;padding:8px;max-height:30vh;overflow:auto}
+#botbar{display:flex;flex-wrap:wrap;gap:10px;padding:12px 20px;background:#0e1420;border-bottom:1px solid var(--line);position:sticky;top:49px;z-index:2}
+#botbar a{cursor:pointer;padding:12px 18px;border-radius:12px;background:#17223a;border:1px solid #2a3b5c;color:var(--tx);font-weight:700;font-size:15px;text-decoration:none;user-select:none}
+#botbar a:hover{background:#1f2f50}#botbar a.on{background:var(--b);color:#041021;border-color:var(--b)}
+</style></head><body>
+<header><h1>⚡ ALL BOTS <span class="pill" style="font-size:11px">GitHub backup</span></h1><button id="forget" class="pill" style="cursor:pointer;background:transparent;color:var(--mut)">forget token</button><span id="hb" class="pill" style="font-weight:700">● data …</span><span class="sub" id="gen">loading…</span><button id="refb" class="pill" style="cursor:pointer;background:transparent;color:var(--tx)">↻ Refresh now</button>
+<nav id="nav"></nav></header><div id="botbar"><a data-k="overview">🏠 Overview</a><a data-k="lebron">📈 LeBron TD desk</a><a data-k="cade">🪙 Cade</a><a data-k="mj">🏀 MJ Parlays</a><a data-k="chat">🤖 Local Agents / Apothua chat</a><a data-k="manifest">🌀 Manifest</a></div><div id="stale">Data is stale — the dashboard backend may be down (supervisor restarts it automatically).</div>
+<div id="gate" style="display:none;position:fixed;inset:0;background:#0b0f17f2;z-index:9;align-items:center;justify-content:center">
+<div class="card" style="max-width:520px"><h3>Connect your GitHub token</h3><p>Paste your <b>fine-grained</b> token with <b>Contents: Read and write</b> on <b>letseateveryday-lab/bots-backup-data</b> only.
+It is stored only in this browser (localStorage) and sent only to api.github.com.</p>
+<input id="tokin" type="password" style="width:100%;padding:8px;background:#0e1520;color:#d7e0ee;border:1px solid #1f2b3d;border-radius:8px" placeholder="github_pat_...">
+<div style="margin-top:10px"><button class="send" id="toksave" style="padding:8px 18px">Save</button> <span id="tokerr" class="r"></span></div></div></div><main>
+<section class="sec" id="s-overview"></section><section class="sec" id="s-lebron"></section><section class="sec" id="s-cade"></section>
+<section class="sec" id="s-mj"></section><section class="sec" id="s-agents"></section><section class="sec" id="s-chat"></section><section class="sec" id="s-manifest"></section>
+</main>
+<script>
+const TABS=[['overview','Overview'],['lebron','LeBron TD'],['cade','Cade'],['mj','MJ Parlays'],['agents','Local Agents'],['chat','Agents Chat'],['manifest','Manifest']];
+const MIR={};
+let tab=(location.hash||'').slice(1)||localStorage.getItem('dtab')||'overview', chatT=localStorage.getItem('dchat')||'apothua', draft='';
+const $=s=>document.getElementById(s), esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const U='<span class="m">unavailable</span>', n=(v,d=2)=>v==null||v===''||isNaN(+v)?U:(+v).toFixed(d), cls=v=>+v>0?'g':+v<0?'r':'';
+const agec=a=>a==null?'r':a<30?'g':a<120?'y':'r', dot=c=>`<span class="dot" style="background:var(--${c})"></span>`;
+const fts=t=>t?new Date(+t*1000).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+$('nav').innerHTML=TABS.map(([k,l])=>`<button data-k="${k}">${l}</button>`).join('');
+$('botbar').onclick=e=>{const k=e.target.dataset.k;if(k){tab=k;localStorage.setItem('dtab',k);history.replaceState(null,'','#'+k);render()}};
+$('nav').onclick=e=>{const k=e.target.dataset.k;if(k){tab=k;localStorage.setItem('dtab',k);render()}};
+function hbRow(name,h){if(!h)return `<tr><td>${name}</td><td colspan=3>${U}</td></tr>`;return `<tr><td>${dot(agec(h.age))}${name}</td><td>${h.age==null?U:h.age+'s'}</td><td>${esc(h.state??(h.valve_on===undefined?'':'valve_on='+h.valve_on))}</td><td class="${h.err?'r':''}">${esc(h.err||'')}</td></tr>`}
+function overview(D){const H=D.health||[],L=D.lebron||{},C=D.cade||{},M=D.mj||{},A=D.agents||{};
+ return `<div class="grid"><div class="card"><h3>LeBron paper</h3><div class="big">$${n(L.balance)}</div><div class="m">spot $${n(L.spot)} · ${(L.opens||[]).length} open</div><div>24h: <b class="${cls(L.pnl24)}">$${n(L.pnl24)}</b> · ${L.n24??'?'} closes · ${L.wins24??'?'} wins</div></div>
+ <div class="card"><h3>Cade (paper)</h3><div class="big">$${n(C.equity)}</div><div class="m">cash $${n(C.cash)} · open ${esc(JSON.stringify(C.open??'?'))} · halt ${esc(C.halt)}</div><div class="m">cycle ${C.cycle_age??'?'}s ago</div></div>
+ <div class="card"><h3>MJ parlays (paper)</h3><div class="big ${cls(M.paper_net_settled)}">$${n(M.paper_net_settled)}</div><div class="m">${M.n??'?'} parlays · ${esc(JSON.stringify(M.status_counts||{}))}</div><div class="m">feed ${esc(M.live_generated||'?')}</div></div>
+ <div class="card"><h3>Local agents</h3><div>${dot(A.ollama&&A.ollama.ok?'g':'r')}Ollama ${esc((A.ollama&&A.ollama.models||[]).join(', '))}</div><div>${dot(agec(A.apothua_log_age))}Apothua loop log ${A.apothua_log_age??'?'}s</div><div>${dot(agec(A.manifest_hb_age))}Manifest ${A.manifest_hb_age??'?'}s</div></div>
+ <div class="card full"><h3>Processes</h3><div class="grid">${H.map(h=>`<div>${dot(h.ok?'g':'r')}${esc(h.name)} <span class="m">${h.ok?'pid '+h.pids.join(','):'DOWN'}</span></div>`).join('')}</div></div></div>`}
+function lebron(L){if(!L||L.unavailable)return `<div class="card">${U} ${esc(L&&L.unavailable)}</div>`;
+ return `<div class="grid"><div class="card"><h3>Balances</h3><div class="big">$${n(L.balance)}</div><div class="m">spot $${n(L.spot)} · ${L.closed_total} closes all-time</div><div>24h realized <b class="${cls(L.pnl24)}">$${n(L.pnl24)}</b> (${L.n24} closes)</div></div>
+ <div class="card"><h3>Safety heartbeats</h3><table>${Object.entries(L.hb||{}).map(([k,v])=>hbRow(k,v)).join('')}</table><div class="m">scan: ${esc(L.scan_last||'unavailable')}</div></div>
+ <div class="card"><h3>Supervisor backoff</h3><pre>${esc(Object.entries(L.supervisor||{}).map(([k,v])=>k+': '+(v.attempts||0)).join('\n'))}</pre></div>
+ <div class="card full"><h3>Paper opens & stops</h3><table><tr><th>Symbol</th><th>Side</th><th>Entry</th><th>Mark</th><th>Active stop</th><th>Src</th><th>BE</th><th>Trail %</th><th>Grade</th><th>Source</th><th>Live SL</th></tr>
+ ${(L.opens||[]).map(o=>{const lv=(L.live_tracked||[]).find(x=>x.symbol===o.symbol);return `<tr><td><b>${esc(o.symbol)}</b></td><td class="${o.side==='bullish'?'g':'r'}">${esc(o.side)}</td><td>${o.entry}</td><td>${o.mark_price??''}</td><td>${o.active_stop??''}</td><td>${esc(o.active_stop_src)}</td><td>${o.be_armed?'✔':''}</td><td>${o.trail_pct??''}</td><td>${esc(o.grade)}</td><td>${esc(o.source||'scanner')}</td><td>${lv?esc(lv.sl)+(lv.sl_placed?' ✔':' ✖'):'<span class="m">—</span>'}</td></tr>`}).join('')}</table></div>
+ <div class="card full"><h3>Recent closes</h3><table><tr><th>Closed</th><th>Symbol</th><th>Side</th><th>Setup</th><th>Grade</th><th>PnL $</th><th>Margin %</th><th>Reason</th></tr>${(L.recent||[]).map(c=>`<tr><td>${fts(c.closed_ts)}</td><td>${esc(c.symbol)}</td><td>${esc(c.side)}</td><td>${esc(c.kind||'')} ${esc(c.count??'')}</td><td>${esc(c.grade)}</td><td class="${cls(c.pnl_usd)}">${n(c.pnl_usd,3)}</td><td class="${cls(c.pnl_margin_pct)}">${n(c.pnl_margin_pct,1)}</td><td class="m">${esc(c.reason||'')}</td></tr>`).join('')}</table></div>
+ <div class="card full"><h3>Supervisor log</h3><pre>${esc((L.supervisor_log||[]).join('\n'))}</pre></div></div>`}
+function cade(C){if(!C||C.unavailable)return `<div class="card">${U}</div>`;
+ return `<div class="grid"><div class="card"><h3>Engine</h3><div class="big">$${n(C.equity)}</div><div class="m">start $${n(C.start_usd)} · cash $${n(C.cash)}</div><div>cycle ${esc(C.cycle_ts)} (${C.cycle_age}s) · halt ${esc(C.halt)}</div></div>
+ <div class="card"><h3>Data sources</h3>${Object.entries(C.sources||{}).map(([k,v])=>`<div>${dot(v==='ok'?'g':'r')}${esc(k)} <span class="m">${esc(v)}</span></div>`).join('')||U}</div>
+ <div class="card"><h3>Open positions</h3><pre>${esc(JSON.stringify(C.positions,null,1)).slice(0,1500)||U}</pre></div>
+ <div class="card full"><h3>Closed trades</h3><table><tr><th>Token</th><th>Entry</th><th>Cost</th><th>Proceeds</th><th>PnL</th><th>Why</th></tr>${(C.closed||[]).map(c=>`<tr><td><b>${esc(c.sym)}</b></td><td>${esc((c.entry||'').slice(5,16))}</td><td>${n(c.cost)}</td><td>${n(c.proceeds)}</td><td class="${cls(c.pnl)}">${n(c.pnl,3)}</td><td class="m">${esc(String(c.why||'').slice(0,80))}</td></tr>`).join('')}</table></div>
+ <div class="card full"><h3>Engine log</h3><pre>${esc((C.log||[]).join('\n'))}</pre></div></div>`}
+function mj(M){if(!M||M.unavailable)return `<div class="card">${U}</div>`;const sc=s=>s==='won'?'g':s==='lost'?'r':'y';
+ return `<div class="grid"><div class="card"><h3>Paper results (settled)</h3><div class="big ${cls(M.paper_net_settled)}">$${n(M.paper_net_settled)}</div><div class="m">${esc(JSON.stringify(M.status_counts))}</div><div class="m">live feed ${esc(M.live_generated)} · ${M.games} games · errors ${esc(JSON.stringify(M.live_errors))}</div></div>
+ ${(M.parlays||[]).map(p=>`<div class="card"><h3>${esc(p.parlay_id)} · ${esc(p.tier)}</h3><div><span class="pill ${sc(p.status)}">${esc(p.status||'open')}</span> <b>${esc(p.combined_american||'')}</b> <span class="m">stake $${p.stake_paper??'?'} · ${esc(p.verdict||'')} · ${p.locked?'locked':'building'}</span></div><table>${(p.legs||[]).map(l=>`<tr><td>${esc(l.leg)}</td><td class="m">${esc(l.game)}</td><td>${l.odds??''}</td><td class="${sc(l.status)}">${esc(l.status)}</td></tr>`).join('')}</table><div class="ts">${esc(p.built_at)}</div></div>`).join('')}</div>`}
+function agents(A){if(!A||A.unavailable)return `<div class="card">${U}</div>`;
+ return `<div class="grid"><div class="card"><h3>Ollama</h3>${dot(A.ollama.ok?'g':'r')}${A.ollama.ok?esc(A.ollama.models.join(', ')):'down '+esc(A.ollama.err)}</div>
+ <div class="card"><h3>Manifest wormhole</h3>${dot(agec(A.manifest_hb_age))}heartbeat ${A.manifest_hb_age??'?'}s · mode ${esc((A.manifest_ui||{}).mode||'?')}</div>
+ <div class="card"><h3>Apothua loop</h3>${dot(agec(A.apothua_log_age))}log ${A.apothua_log_age??'?'}s ago<pre>${esc((A.apothua_log||[]).join('\n'))}</pre></div>
+ ${['neoshua_local','ape','apotheosis'].map(r=>{const c=(A.conv||{})[r]||[],l=c[c.length-1];return `<div class="card"><h3>${r}</h3>${l?`<div class="ts">${esc(l.ts)} · ${esc(l.path)} ${l.secs??''}s</div><div>${esc(l.reply).slice(0,300)}</div>`:'<span class="m">no conversations yet</span>'}</div>`}).join('')}</div>`}
+function chat(D){const A=D.agents||{},c=((A.conv||{})[chatT])||[],B=(D.bridge||[]).slice(-14);
+ return `<div class="grid"><div class="card full"><h3>Conversation · <select id="ct">${['apothua','neoshua_local','ape','apotheosis'].map(t=>`<option ${t===chatT?'selected':''}>${t}</option>`).join('')}</select> ${D.bridge_busy?'<span class="pill y">reply running…</span>':''}</h3>
+ <div class="chat" id="chatbox">${c.map(t=>`${t.msg?`<div class="u">${esc(t.msg)}<div class="ts">${esc(t.ts)}</div></div>`:''}<div class="a">${esc(t.reply)}<div class="ts">${esc(t.path||'')} ${t.secs??''}</div></div>`).join('')||'<span class="m">No messages yet.</span>'}</div>
+ <div class="composer"><textarea id="msg" placeholder="Message ${chatT}… (Ctrl+Enter to send)"></textarea><button class="send" id="sendb">Send</button></div>
+ <div class="m" style="margin-top:6px">Send writes your message to the private repo's inbox; the desk picks it up within ~10s and runs the line shown below. Replies appear here in ~15-60s. Approvals can't be sent from here.</div></div>
+ <div class="card full"><h3>Terminal (bridge)</h3><div class="term"><pre>${esc(B.map(b=>`[${b.ts}] ${b.target||''} ${b.status}${b.cmd?'\n$ '+b.cmd:''}${b.out?'\n'+b.out:''}`).join('\n\n'))||'no bridge activity yet'}</pre></div></div></div>`}
+function manifest(M){if(!M||M.unavailable)return `<div class="card">${U}</div>`;
+ return `<div class="card"><h3>Manifest wormhole · read-only · heartbeat ${M.hb_age??'?'}s</h3><div class="chat">${(M.msgs||[]).map(m=>`<div class="${m.from&&String(m.from).startsWith('Chill')?'u':'a'}"><b>${esc(m.from)}</b> → ${esc(m.to)} <span class="pill">${esc(m.box)}</span><br>${esc(m.body)}<div class="ts">${esc(m.ts)}</div></div>`).join('')||'<span class="m">no messages</span>'}</div><div class="m" style="margin-top:6px">Posting to Manifest needs its owner sign-in, so it stays on the Manifest page itself.</div></div>`}
+function hbBadge(D){const a=Math.round(Date.now()/1000-D.gen_ts),e=$('hb');e.textContent='● data '+a+'s old';e.style.background=a>90?'var(--r)':a>40?'var(--y)':'var(--g)';e.style.color='#041021'}
+function render(){const D=window.DASH;if(!D)return;hbBadge(D);
+ [...$('nav').children,...$('botbar').children].forEach(b=>b.classList.toggle('on',b.dataset.k===tab));TABS.forEach(([k])=>$('s-'+k).classList.toggle('on',k===tab));
+ const age=Date.now()/1000-D.gen_ts;$('gen').textContent=`updated ${D.generated} (${Math.round(age)}s ago) · read-only`;$('stale').style.display=age>90?'block':'none';$('stale').textContent='Data is stale — the desk sync or GitHub may be down.';
+ if(tab==='chat'&&$('msg'))draft=$('msg').value;
+ if(MIR[tab])return;
+ const f={manifest:()=>manifest(D.manifest),overview:()=>overview(D),lebron:()=>lebron(D.lebron),cade:()=>cade(D.cade),mj:()=>mj(D.mj),agents:()=>agents(D.agents),chat:()=>chat(D)}[tab];
+ if(tab==='chat'&&document.activeElement&&document.activeElement.id==='msg'){const t=document.createElement('div');t.innerHTML=f();
+  $('chatbox').innerHTML=t.querySelector('#chatbox').innerHTML;document.querySelector('#s-chat .term').innerHTML=t.querySelector('.term').innerHTML;return} // keep typing
+ $('s-'+tab).innerHTML=f();
+ if(tab==='chat'){$('msg').value=draft;$('sendb').onclick=send;$('msg').onkeydown=e=>{if(e.key==='Enter'&&e.ctrlKey)send()};
+  $('ct').onchange=e=>{chatT=e.target.value;localStorage.setItem('dchat',chatT);render()};const cb=$('chatbox');cb.scrollTop=cb.scrollHeight}}
+$('refb').onclick=()=>load();
+setInterval(()=>{if(window.DASH)hbBadge(window.DASH)},1000);
+window.addEventListener('hashchange',()=>{const k=location.hash.slice(1);if(k){tab=k;render()}});
+
+const REPO='letseateveryday-lab/bots-backup-data',API='https://api.github.com/repos/'+REPO;
+const TK=()=>localStorage.getItem('bb_token')||'';
+function gate(show,err){$('gate').style.display=show?'flex':'none';$('tokerr').textContent=err||''}
+$('toksave').onclick=()=>{const v=$('tokin').value.trim();if(!v)return;localStorage.setItem('bb_token',v);gate(false);load()};
+$('forget').onclick=()=>{localStorage.removeItem('bb_token');gate(true)};
+async function load(){if(!TK()){gate(true);return}
+ try{const r=await fetch(API+'/contents/data.json?ref=data&t='+Date.now(),{headers:{Authorization:'Bearer '+TK(),Accept:'application/vnd.github.raw'},cache:'no-store'});
+  if(r.status===401||r.status===403||r.status===404){gate(true,'GitHub said '+r.status+' — check the token and its repo access.');return}
+  if(!r.ok)throw new Error('HTTP '+r.status);window.DASH=await r.json();render()}catch(e){$('stale').style.display='block';$('stale').textContent='Could not reach GitHub: '+e.message}}
+async function send(){const t=$('msg').value.trim();if(!t)return;if(t.length>2000){alert('Max 2000 characters');return}
+ if(/^\s*(approve|reject)\b/i.test(t)){alert("Approvals can't be sent from the backup viewer.");return}
+ const ts=Date.now(),nonce=[...crypto.getRandomValues(new Uint8Array(12))].map(b=>b.toString(16).padStart(2,'0')).join('');
+ const name=ts+'-'+chatT+'-'+nonce+'.json',body=JSON.stringify({target:chatT,text:t,nonce,ts});
+ const r=await fetch(API+'/contents/inbox/'+name,{method:'PUT',headers:{Authorization:'Bearer '+TK(),Accept:'application/vnd.github+json'},
+  body:JSON.stringify({message:'dash msg',content:btoa(unescape(encodeURIComponent(body)))})});
+ if(!r.ok){alert('Send failed: HTTP '+r.status);return} $('msg').value='';draft='';alert('Sent. The desk picks it up within ~10s; the reply shows here when the agent answers.')}
+load();setInterval(load,10000);
+</script></body></html>
